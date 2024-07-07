@@ -19,6 +19,6 @@ ln -s ../rockyou2024.txt input.txt
 ./search
 Enter the keyword to search: Hunter02
 Enter the filename to search in: input.txt
-Current occurrences of keyword "Hunter02": 304
-Search complete. Time taken: 160.638 seconds
+Occurrences of keyword "Hunter02": 316
+Search complete. Time taken: 517.751 seconds
 ```

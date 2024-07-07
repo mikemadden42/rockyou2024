@@ -42,7 +42,7 @@ void search_in_file(const std::string& filename, const std::string& keyword) {
         file.seekg(-(std::streamoff)(keyword.size() - 1), std::ios::cur);
 
         // Print current count on the same line
-        std::cout << "\rCurrent occurrences of keyword \"" << keyword
+        std::cout << "\rOccurrences of keyword \"" << keyword
                   << "\": " << count << std::flush;
     }
 
