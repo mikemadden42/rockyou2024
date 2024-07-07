@@ -1,86 +1,81 @@
-#include <cstring>
-#include <ctime>
+#include <chrono>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <string>
+#include <string_view>
+#include <vector>
 
-#define CHUNK_SIZE (1024 * 1024)  // 1 MB
-#define MAX_KEYWORD_LENGTH 256
-#define MAX_FILENAME_LENGTH 1024
+namespace fs = std::filesystem;
 
-int search_in_chunk(const char *buffer, const char *keyword,
-                    size_t keyword_length) {
+constexpr std::size_t CHUNK_SIZE = 1024 * 1024;  // 1 MB
+
+int search_in_chunk(const std::string_view buffer, const std::string& keyword) {
     int count = 0;
-    const char *pos = buffer;
-    while ((pos = strstr(pos, keyword)) != nullptr) {
-        count++;
-        pos += keyword_length;
+    std::size_t pos = 0;
+    while ((pos = buffer.find(keyword, pos)) != std::string::npos) {
+        ++count;
+        pos += keyword.length();
     }
     return count;
 }
 
-int main() {
-    clock_t start_time, end_time;
-    double cpu_time_used;
-
-    char keyword[MAX_KEYWORD_LENGTH];
-    char filename[MAX_FILENAME_LENGTH];
-
-    // Get the keyword from the user
-    std::cout << "Enter the keyword to search: ";
-    std::cin.getline(keyword, MAX_KEYWORD_LENGTH);
-    size_t keyword_length = strlen(keyword);
-    if (keyword[keyword_length - 1] == '\n') {
-        keyword[keyword_length - 1] = '\0';
-        keyword_length--;
-    }
-
-    // Get the filename from the user
-    std::cout << "Enter the filename to search in: ";
-    std::cin.getline(filename, MAX_FILENAME_LENGTH);
-
+void search_in_file(const std::string& filename, const std::string& keyword) {
     std::ifstream file(filename, std::ios::binary);
     if (!file.is_open()) {
-        std::cerr << "Error opening file: " << filename << std::endl;
-        return EXIT_FAILURE;
+        throw std::runtime_error("Error opening file: " + filename);
     }
 
-    char *buffer = new char[CHUNK_SIZE + keyword_length - 1];
-    if (buffer == nullptr) {
-        std::cerr << "Error allocating buffer" << std::endl;
-        file.close();
-        return EXIT_FAILURE;
-    }
+    // Allocate buffer with extra space for overlapping
+    std::vector<char> buffer(CHUNK_SIZE);
 
-    // Start the timer
-    start_time = clock();
+    auto start_time = std::chrono::high_resolution_clock::now();
 
-    size_t bytes_read;
     int count = 0;
-    while (file.read(buffer, CHUNK_SIZE)) {
-        bytes_read = file.gcount();
-        buffer[bytes_read] = '\0';  // Null-terminate the buffer
-        count += search_in_chunk(buffer, keyword, keyword_length);
+    while (file.read(buffer.data(), CHUNK_SIZE)) {
+        auto bytes_read = file.gcount();
+        count += search_in_chunk(std::string_view(buffer.data(), bytes_read),
+                                 keyword);
 
         // Move the file pointer to adjust for overlapping
-        file.seekg(-(std::streamoff)(keyword_length - 1), std::ios::cur);
+        file.seekg(-(std::streamoff)(keyword.size() - 1), std::ios::cur);
 
         // Print current count on the same line
         std::cout << "\rCurrent occurrences of keyword \"" << keyword
                   << "\": " << count << std::flush;
     }
 
-    // Stop the timer
-    end_time = clock();
+    auto end_time = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> cpu_time_used = end_time - start_time;
 
     std::cout << std::endl;  // Move to the next line after completion
-    delete[] buffer;
-    file.close();
+    std::cout << "Search complete. Time taken: " << cpu_time_used.count()
+              << " seconds" << std::endl;
+}
 
-    // Calculate the elapsed time
-    cpu_time_used = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
-    std::cout << "Search complete. Time taken: " << cpu_time_used << " seconds"
-              << std::endl;
+int main() {
+    try {
+        std::string keyword;
+        std::string filename;
 
-    return EXIT_SUCCESS;
+        // Get the keyword from the user
+        std::cout << "Enter the keyword to search: ";
+        std::getline(std::cin, keyword);
+
+        // Get the filename from the user
+        std::cout << "Enter the filename to search in: ";
+        std::getline(std::cin, filename);
+
+        if (!fs::exists(filename)) {
+            throw std::runtime_error("File does not exist: " + filename);
+        }
+
+        search_in_file(filename, keyword);
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
+
+    return 0;
 }
