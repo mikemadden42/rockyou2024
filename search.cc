@@ -55,18 +55,15 @@ int main() {
     // Start the timer
     start_time = clock();
 
-    size_t chunk_start = 0;
     size_t bytes_read;
     int count = 0;
     while (file.read(buffer, CHUNK_SIZE)) {
         bytes_read = file.gcount();
         buffer[bytes_read] = '\0';  // Null-terminate the buffer
         count += search_in_chunk(buffer, keyword, keyword_length);
-        chunk_start += bytes_read;
 
         // Move the file pointer to adjust for overlapping
         file.seekg(-(std::streamoff)(keyword_length - 1), std::ios::cur);
-        chunk_start -= keyword_length - 1;
 
         // Print current count on the same line
         std::cout << "\rCurrent occurrences of keyword \"" << keyword
