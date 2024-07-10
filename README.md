@@ -12,7 +12,10 @@ The b3sum for the rockyou2024.txt file can be found here:
 Build & run the project with these steps.  You will need a C++ compiler, cmake, & ninja.
 
 ```bash
-mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release .. && ninja
+mkdir build
+cd build
+cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
+ninja
 
 ln -s ../rockyou2024.txt input.txt
 
