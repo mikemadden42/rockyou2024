@@ -40,11 +40,6 @@ void search_in_file(const std::string& filename, const std::string& keyword) {
     const std::size_t overlap = keyword.size() - 1;
     std::vector<char> buffer(CHUNK_SIZE + overlap);
 
-    auto print_count = [&keyword](std::uint64_t count) {
-        std::cout << "\rOccurrences of keyword \"" << keyword
-                  << "\": " << count << std::flush;
-    };
-
     auto start_time = std::chrono::high_resolution_clock::now();
 
     std::uint64_t count = 0;
@@ -61,40 +56,51 @@ void search_in_file(const std::string& filename, const std::string& keyword) {
                      carried);
 
         // Print current count on the same line
-        print_count(count);
+        std::cerr << "\rOccurrences of keyword \"" << keyword
+                  << "\": " << count << std::flush;
     }
 
     if (std::ferror(file.get())) {
-        std::cout << std::endl;
+        std::cerr << std::endl;
         throw std::runtime_error("Error reading file: " + filename);
     }
-
-    print_count(count);
 
     auto end_time = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed_time = end_time - start_time;
 
-    std::cout << std::endl;  // Move to the next line after completion
-    std::cout << "Search complete. Time taken: " << elapsed_time.count()
+    // Return to the start of the line so the result replaces the progress count
+    std::cerr << '\r' << std::flush;
+    std::cout << "Occurrences of keyword \"" << keyword << "\": " << count
+              << std::endl;
+    std::cerr << "Search complete. Time taken: " << elapsed_time.count()
               << " seconds" << std::endl;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    if (argc > 2) {
+        std::cerr << "Usage: " << argv[0] << " [filename]" << std::endl;
+        return 1;
+    }
+
     try {
         std::string keyword;
         std::string filename;
 
         // Get the keyword from the user
-        std::cout << "Enter the keyword to search: ";
+        std::cerr << "Enter the keyword to search: ";
         std::getline(std::cin, keyword);
 
         if (keyword.empty()) {
             throw std::runtime_error("Keyword must not be empty");
         }
 
-        // Get the filename from the user
-        std::cout << "Enter the filename to search in: ";
-        std::getline(std::cin, filename);
+        // Get the filename from the command line or the user
+        if (argc == 2) {
+            filename = argv[1];
+        } else {
+            std::cerr << "Enter the filename to search in: ";
+            std::getline(std::cin, filename);
+        }
 
         if (!fs::exists(filename)) {
             throw std::runtime_error("File does not exist: " + filename);
