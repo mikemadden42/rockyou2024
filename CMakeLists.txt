@@ -99,7 +99,16 @@ foreach(test_name
         missing_file
         directory
         filename_argument
-        too_many_arguments)
+        too_many_arguments
+        help_option
+        unknown_option
+        exact_whole_lines
+        exact_no_trailing_newline
+        exact_crlf
+        exact_empty_file
+        exact_chunk_boundaries
+        exact_line_longer_than_chunk
+        exact_keyword_longer_than_chunk)
     add_test(NAME ${test_name} COMMAND search_test $<TARGET_FILE:search> ${test_name})
     set_tests_properties(${test_name} PROPERTIES TIMEOUT 30)
 endforeach()
