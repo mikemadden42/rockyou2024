@@ -14,64 +14,46 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Specify the C++ flags for GCC/Clang
-if (NOT MSVC)
-  add_compile_options(-Wall -Wextra -pedantic)
+if (MSVC)
+    message(FATAL_ERROR "MSVC is not supported")
 endif()
+add_compile_options(-Wall -Wextra -pedantic)
 
 # Define build types
 set(CMAKE_CONFIGURATION_TYPES Debug Release ASAN UBSAN TSAN MSAN COVERAGE RelWithDebInfo)
 
-# Define ASAN build type flags
-if (MSVC)
-    set(CMAKE_CXX_FLAGS_ASAN "/fsanitize=address")
-    set(CMAKE_EXE_LINKER_FLAGS_ASAN "/fsanitize=address")
-else()
-    set(CMAKE_CXX_FLAGS_ASAN "-fsanitize=address -fno-omit-frame-pointer")
-    set(CMAKE_EXE_LINKER_FLAGS_ASAN "-fsanitize=address")
+# MemorySanitizer isn't available with Apple clang
+if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    list(REMOVE_ITEM CMAKE_CONFIGURATION_TYPES MSAN)
+    string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_UPPER)
+    if (BUILD_TYPE_UPPER STREQUAL "MSAN")
+        message(FATAL_ERROR "MSAN is not supported on macOS")
+    endif()
 endif()
+
+# Define ASAN build type flags
+set(CMAKE_CXX_FLAGS_ASAN "-fsanitize=address -fno-omit-frame-pointer")
+set(CMAKE_EXE_LINKER_FLAGS_ASAN "-fsanitize=address")
 
 # Define UBSan build type flags
-if (MSVC)
-    set(CMAKE_CXX_FLAGS_UBSAN "/fsanitize=undefined")
-    set(CMAKE_EXE_LINKER_FLAGS_UBSAN "/fsanitize=undefined")
-else()
-    set(CMAKE_CXX_FLAGS_UBSAN "-fsanitize=undefined -fno-sanitize-recover=all")
-    set(CMAKE_EXE_LINKER_FLAGS_UBSAN "-fsanitize=undefined")
-endif()
+set(CMAKE_CXX_FLAGS_UBSAN "-fsanitize=undefined -fno-sanitize-recover=all")
+set(CMAKE_EXE_LINKER_FLAGS_UBSAN "-fsanitize=undefined")
 
 # Define TSan build type flags
-if (MSVC)
-    message(FATAL_ERROR "ThreadSanitizer is not supported by MSVC")
-else()
-    set(CMAKE_CXX_FLAGS_TSAN "-fsanitize=thread")
-    set(CMAKE_EXE_LINKER_FLAGS_TSAN "-fsanitize=thread")
-endif()
+set(CMAKE_CXX_FLAGS_TSAN "-fsanitize=thread")
+set(CMAKE_EXE_LINKER_FLAGS_TSAN "-fsanitize=thread")
 
 # Define MSan build type flags
-if (MSVC)
-    message(FATAL_ERROR "MemorySanitizer is not supported by MSVC")
-else()
-    set(CMAKE_CXX_FLAGS_MSAN "-fsanitize=memory -fsanitize-memory-track-origins")
-    set(CMAKE_EXE_LINKER_FLAGS_MSAN "-fsanitize=memory")
-endif()
+set(CMAKE_CXX_FLAGS_MSAN "-fsanitize=memory -fsanitize-memory-track-origins")
+set(CMAKE_EXE_LINKER_FLAGS_MSAN "-fsanitize=memory")
 
 # Define Coverage build type flags
-if (MSVC)
-    set(CMAKE_CXX_FLAGS_COVERAGE "/DEBUG /COVERAGE")
-    set(CMAKE_EXE_LINKER_FLAGS_COVERAGE "/DEBUG /COVERAGE")
-else()
-    set(CMAKE_CXX_FLAGS_COVERAGE "--coverage -O0 -g")
-    set(CMAKE_EXE_LINKER_FLAGS_COVERAGE "--coverage")
-endif()
+set(CMAKE_CXX_FLAGS_COVERAGE "--coverage -O0 -g")
+set(CMAKE_EXE_LINKER_FLAGS_COVERAGE "--coverage")
 
 # Define RelWithDebInfo build type flags
-if (MSVC)
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/O2 /DEBUG")
-    set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "/DEBUG")
-else()
-    set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
-    set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "-O2 -g")
-endif()
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "-O2 -g")
 
 # Add the executable
 add_executable(search search.cc)
