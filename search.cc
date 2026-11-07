@@ -72,10 +72,10 @@ void search_in_file(const std::string& filename, const std::string& keyword) {
     print_count(count);
 
     auto end_time = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> cpu_time_used = end_time - start_time;
+    std::chrono::duration<double> elapsed_time = end_time - start_time;
 
     std::cout << std::endl;  // Move to the next line after completion
-    std::cout << "Search complete. Time taken: " << cpu_time_used.count()
+    std::cout << "Search complete. Time taken: " << elapsed_time.count()
               << " seconds" << std::endl;
 }
 

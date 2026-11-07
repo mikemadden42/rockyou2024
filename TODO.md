@@ -33,7 +33,7 @@ unless marked otherwise. Line numbers refer to commit 85cd5ed.
 
 - [x] Fix the comment at `search.cc:30`, which promises extra buffer space that isn't
   allocated.
-- [ ] Rename `cpu_time_used` (`search.cc:50`), which is really wall-clock time.
+- [x] Rename `cpu_time_used` (`search.cc:50`), which is really wall-clock time.
 
 ## Performance
 
@@ -92,8 +92,8 @@ different hardware, and the real file wasn't available to test.
 
 ## README and usability
 
-- [ ] Fix `README.md:9`, which says the b3sum is for the `.txt` file. It's for the `.zip`.
+- [x] Fix `README.md:9`, which says the b3sum is for the `.txt` file. It's for the `.zip`.
 - [ ] Add a filename argument so the tool can be scripted. Keep reading the keyword from
   stdin, because a password in `argv` ends up in shell history and `ps`.
-- [ ] Document that matches are substrings: `Hunter02` also counts `xHunter02!`.
+- [x] Document that matches are substrings: `Hunter02` also counts `xHunter02!`.
 - [ ] Consider a whole-line `--exact` mode to answer "is this exact password in the list?"

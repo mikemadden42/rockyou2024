@@ -6,7 +6,7 @@ Quickly search the rockyou2024.txt file, which is ~ 150 GB.
 This is a C++ port based on this original C project:
 - https://github.com/elithaxxor/RockYou2024_Reader
 
-The b3sum for the rockyou2024.txt file can be found here:
+The b3sum for the rockyou2024.zip file can be found here:
 - rockyou2024.zip.b3sum
 
 NOTE: Make sure you have the full zip and txt file available before you run the `ln` command or run the tool. The files are very large so they are not contained in the git repository.
@@ -32,4 +32,14 @@ Enter the keyword to search: Hunter02
 Enter the filename to search in: input.txt
 Occurrences of keyword "Hunter02": 316
 Search complete. Time taken: 517.751 seconds
+```
+
+The time above was measured before the read loop was rewritten. Your time will depend mostly on your disk.
+
+The search matches substrings, so `Hunter02` also counts `xHunter02!`. The result is the number of occurrences, not the number of matching lines, and matches are case-sensitive.
+
+Run the tests from the `build` directory:
+
+```bash
+ctest --output-on-failure
 ```
