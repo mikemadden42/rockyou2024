@@ -86,8 +86,9 @@ different hardware, and the real file wasn't available to test.
 
 - [x] Make the test step meaningful. `ctest` printed "No tests were found!!!" and exited 0,
   so it always passed. It now fails if no tests are found.
-- [ ] Build more than Release on Ubuntu.
-- [ ] Update `actions/checkout@v3`.
+- [x] Build more than Release on Ubuntu. CI now also builds ASAN and UBSAN there, plus
+  Release on macOS.
+- [x] Update `actions/checkout@v3`.
 
 ## README and usability
 
