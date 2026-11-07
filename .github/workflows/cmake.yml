@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-latest, build_type: Release }
+          - { os: ubuntu-latest, build_type: Release, slow_tests: 'ON' }
           - { os: ubuntu-latest, build_type: ASAN }
           - { os: ubuntu-latest, build_type: UBSAN }
           - { os: macos-latest, build_type: Release }
@@ -27,7 +27,7 @@ jobs:
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DSEARCH_SLOW_TESTS=${{matrix.slow_tests || 'OFF'}}
 
     - name: Build
       # Build your program with the given configuration

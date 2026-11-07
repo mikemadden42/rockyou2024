@@ -64,8 +64,8 @@ different hardware, and the real file wasn't available to test.
 
 - [x] Add `ctest` cases for a small file, a match across chunks, a match at the end of
   the file, and an empty keyword.
-- [ ] Add a test for count overflow. It needs more than 2.1 billion matches, which took
-  about 30 seconds on 2.3 GB of `a`, so it's too slow for a default `ctest` run.
+- [x] Add a test for count overflow. It scans a sparse file of over 2 GB, so it only runs
+  with `-DSEARCH_SLOW_TESTS=ON`, which CI sets for the Ubuntu Release job.
 
 ## Build (`CMakeLists.txt`)
 
