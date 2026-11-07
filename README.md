@@ -60,3 +60,14 @@ ctest --output-on-failure
 ```
 
 Configure with `-DSEARCH_SLOW_TESTS=ON` to also run the count overflow test, which scans over 2 GB.
+
+## How useful is the list?
+
+RockYou2024 was posted to a cybercrime forum in July 2024 with a claim of about 9.9 billion passwords. Published analyses disagree with that figure as a measure of real passwords, and they differ on how much value the list has.
+
+- [Specops](https://specopssoft.com/blog/rockyou2024-analysis-password-leak/) examined the 1,489,515,500 records added since RockYou2021. It removed 873,375,026 records as common hash types, which left 616,140,474. It called the dataset "mostly garbage data" and said it was too large to be of realistic use in cracking a given hash.
+- [Cyberint](https://cyberint.com/?p=33077) reviewed the file and estimated that 1 to 1.5 billion entries are usable. It described credential stuffing with the list as impractical and hash cracking as the more probable use.
+
+These findings have limits. The Specops breakdown covers only the records added since 2021, not the whole file. Cyberint's figure is an estimate without a published breakdown. Neither analysis reports how many real hashes the list cracks, and both come from security vendors.
+
+This project takes no position on the list's value. It's a tool for searching the file, and its results don't show whether an entry was a real password.
