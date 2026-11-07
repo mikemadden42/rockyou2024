@@ -94,3 +94,10 @@ foreach(test_name
     add_test(NAME ${test_name} COMMAND search_test $<TARGET_FILE:search> ${test_name})
     set_tests_properties(${test_name} PROPERTIES TIMEOUT 30)
 endforeach()
+
+# Scanning over 2 GB takes too long for a default test run
+option(SEARCH_SLOW_TESTS "Run tests that take a long time" OFF)
+if (SEARCH_SLOW_TESTS)
+    add_test(NAME count_overflow COMMAND search_test $<TARGET_FILE:search> count_overflow)
+    set_tests_properties(count_overflow PROPERTIES TIMEOUT 300)
+endif()

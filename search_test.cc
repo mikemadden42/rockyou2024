@@ -204,6 +204,22 @@ const std::map<std::string, std::function<void(const SearchRunner&)>> TESTS = {
                                       message.substr(0, 200));
          }
      }},
+    {"count_overflow",
+     [](const SearchRunner& runner) {
+         // A sparse file of zero bytes, where every byte matches a NUL keyword
+         const std::uint64_t size = (std::uint64_t{1} << 31) + CHUNK_SIZE;
+         const fs::path path = runner.write_file("");
+         fs::resize_file(path, size);
+
+         const Result result = runner.run(std::string(1, '\0'), path);
+         const auto count = final_count(result.output);
+
+         if (!result.succeeded || !count || *count != size) {
+             throw std::runtime_error(
+                 "expected count " + std::to_string(size) + ", got " +
+                 (count ? std::to_string(*count) : "none"));
+         }
+     }},
     {"help_option",
      [](const SearchRunner& runner) {
          const Result result = runner.run_with_arguments("", "--help");

@@ -58,3 +58,5 @@ Run the tests from the `build` directory:
 ```bash
 ctest --output-on-failure
 ```
+
+Configure with `-DSEARCH_SLOW_TESTS=ON` to also run the count overflow test, which scans over 2 GB.
