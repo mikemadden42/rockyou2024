@@ -107,6 +107,27 @@ void expect_error(const SearchRunner& runner, const std::string& keyword,
     }
 }
 
+void expect_exact(const SearchRunner& runner, const std::string& keyword,
+                  const std::string& contents, std::uint64_t expected) {
+    const fs::path path = runner.write_file(contents);
+    const Result result =
+        runner.run_with_arguments(keyword, "--exact \"" + path.string() + '"');
+    const auto count = final_count(result.output);
+
+    if (!result.succeeded || !count || *count != expected) {
+        std::ostringstream message;
+        message << "expected " << expected << " exact lines, got "
+                << (count ? std::to_string(*count) : "none");
+        throw std::runtime_error(message.str());
+    }
+}
+
+std::string read_errors(const SearchRunner& runner) {
+    std::ifstream errors(runner.work_dir() / "errors.txt");
+    return std::string(std::istreambuf_iterator<char>(errors),
+                       std::istreambuf_iterator<char>());
+}
+
 const std::map<std::string, std::function<void(const SearchRunner&)>> TESTS = {
     {"small_file",
      [](const SearchRunner& runner) {
@@ -176,15 +197,81 @@ const std::map<std::string, std::function<void(const SearchRunner&)>> TESTS = {
     {"too_many_arguments",
      [](const SearchRunner& runner) {
          const Result result = runner.run_with_arguments("needle", "one two");
-
-         std::ifstream errors(runner.work_dir() / "errors.txt");
-         const std::string message((std::istreambuf_iterator<char>(errors)),
-                                   std::istreambuf_iterator<char>());
+         const std::string message = read_errors(runner);
 
          if (result.succeeded || message.find("Usage:") == std::string::npos) {
              throw std::runtime_error("expected a usage error, got: " +
                                       message.substr(0, 200));
          }
+     }},
+    {"help_option",
+     [](const SearchRunner& runner) {
+         const Result result = runner.run_with_arguments("", "--help");
+
+         if (!result.succeeded ||
+             result.output.find("Usage:") == std::string::npos) {
+             throw std::runtime_error("expected usage on stdout, got: " +
+                                      result.output.substr(0, 200));
+         }
+     }},
+    {"unknown_option",
+     [](const SearchRunner& runner) {
+         const Result result = runner.run_with_arguments("needle", "--nope");
+         const std::string message = read_errors(runner);
+
+         if (result.succeeded || message.find("Usage:") == std::string::npos ||
+             message.find("Enter") != std::string::npos) {
+             throw std::runtime_error("expected a usage error, got: " +
+                                      message.substr(0, 200));
+         }
+     }},
+    {"exact_whole_lines",
+     [](const SearchRunner& runner) {
+         expect_exact(runner, "needle",
+                      "needle\nxneedle\nneedlex\nNeedle\nneedle\n", 2);
+     }},
+    {"exact_no_trailing_newline",
+     [](const SearchRunner& runner) {
+         expect_exact(runner, "needle", "abc\nneedle", 1);
+         expect_exact(runner, "needle", "needle", 1);
+         expect_exact(runner, "needle", "abc\nxneedle", 0);
+     }},
+    {"exact_crlf",
+     [](const SearchRunner& runner) {
+         expect_exact(runner, "needle", "needle\r\nxneedle\r\nneedle\r", 2);
+         expect_exact(runner, "needle", "needle\rx\n", 0);
+     }},
+    {"exact_empty_file",
+     [](const SearchRunner& runner) {
+         expect_exact(runner, "needle", "", 0);
+     }},
+    {"exact_chunk_boundaries",
+     [](const SearchRunner& runner) {
+         // Slide each line across the end of the first chunk, one byte at a time
+         for (const std::string& ending : {"\n", "\r\n"}) {
+             for (std::size_t offset = CHUNK_SIZE - 10; offset <= CHUNK_SIZE + 2;
+                  ++offset) {
+                 const std::string padding =
+                     std::string(offset - 1, 'x') + '\n';
+                 expect_exact(runner, "needle", padding + "needle" + ending, 1);
+                 expect_exact(runner, "needle", padding + "xneedle" + ending, 0);
+                 expect_exact(runner, "needle", padding + "needlex" + ending, 0);
+             }
+         }
+     }},
+    {"exact_line_longer_than_chunk",
+     [](const SearchRunner& runner) {
+         // The keyword lands at the start of a chunk, but not of a line
+         expect_exact(runner, "needle",
+                      std::string(CHUNK_SIZE, 'x') + "needle\nneedle\n", 1);
+         expect_exact(runner, "needle",
+                      std::string(2 * CHUNK_SIZE, 'x') + "needle", 0);
+     }},
+    {"exact_keyword_longer_than_chunk",
+     [](const SearchRunner& runner) {
+         const std::string keyword(CHUNK_SIZE + 1, 'k');
+         expect_exact(runner, keyword, "abc\n" + keyword + "\ndef\n", 1);
+         expect_exact(runner, keyword, "abc\nx" + keyword + "\n", 0);
      }},
 };
 

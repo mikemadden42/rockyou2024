@@ -41,6 +41,12 @@ printf '%s\n' 'Hunter02' | ./search input.txt 2>/dev/null
 Occurrences of keyword "Hunter02": 316
 ```
 
+Add `--exact` to count only lines that are exactly the keyword, which answers whether a specific password is in the list. Lines may end in `\n` or `\r\n`:
+
+```bash
+printf '%s\n' 'Hunter02' | ./search --exact input.txt 2>/dev/null
+```
+
 The keyword is always read from stdin, so it doesn't end up in your shell history or `ps` output.
 
 The time above was measured before the read loop was rewritten. Your time will depend mostly on your disk.
