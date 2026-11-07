@@ -69,11 +69,10 @@ different hardware, and the real file wasn't available to test.
 
 ## Build (`CMakeLists.txt`)
 
-- [ ] Remove the `FATAL_ERROR` calls at lines 38 and 46, which stop every MSVC configure
-  and leave the MSVC branches as dead code. `add_custom_flags` also passes GCC-style
-  flags. (Found by reading the code, not by running it.)
-- [ ] Handle MSan on macOS, where the build fails with Apple clang. The other six build
-  types pass.
+- [x] Remove the MSVC branches, which could never run. Configuring with MSVC now stops
+  with a clear "MSVC is not supported" error.
+- [x] Handle MSan on macOS, where the build fails with Apple clang. It now stops at
+  configure time with a clear message.
 - [x] Delete `add_custom_flags` (lines 74-94). Every sanitizer flag is applied twice, by
   this function and by `CMAKE_CXX_FLAGS_<TYPE>`.
 - [x] Stop overwriting `CMAKE_CXX_FLAGS` on line 12, which discards the user's
