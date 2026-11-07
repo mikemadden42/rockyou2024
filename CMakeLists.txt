@@ -102,3 +102,22 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
         OSX_ARCHITECTURES "x86_64;arm64"
     )
 endif()
+
+# Add the tests
+enable_testing()
+add_executable(search_test search_test.cc)
+
+foreach(test_name
+        small_file
+        empty_file
+        final_partial_chunk
+        across_chunks
+        end_of_file
+        no_double_count
+        keyword_longer_than_chunk
+        empty_keyword
+        missing_file
+        directory)
+    add_test(NAME ${test_name} COMMAND search_test $<TARGET_FILE:search> ${test_name})
+    set_tests_properties(${test_name} PROPERTIES TIMEOUT 30)
+endforeach()

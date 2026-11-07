@@ -62,8 +62,10 @@ different hardware, and the real file wasn't available to test.
 
 ## Tests
 
-- [ ] Add `ctest` cases for a small file, a match across chunks, a match at the end of
+- [x] Add `ctest` cases for a small file, a match across chunks, a match at the end of
   the file, and an empty keyword.
+- [ ] Add a test for count overflow. It needs more than 2.1 billion matches, which took
+  about 30 seconds on 2.3 GB of `a`, so it's too slow for a default `ctest` run.
 
 ## Build (`CMakeLists.txt`)
 
@@ -82,8 +84,8 @@ different hardware, and the real file wasn't available to test.
 
 ## CI (`.github/workflows/cmake.yml`)
 
-- [ ] Make the test step meaningful. `ctest` prints "No tests were found!!!" and exits 0,
-  so it always passes.
+- [x] Make the test step meaningful. `ctest` printed "No tests were found!!!" and exited 0,
+  so it always passed. It now fails if no tests are found.
 - [ ] Build more than Release on Ubuntu.
 - [ ] Update `actions/checkout@v3`.
 
