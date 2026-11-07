@@ -93,7 +93,7 @@ different hardware, and the real file wasn't available to test.
 ## README and usability
 
 - [x] Fix `README.md:9`, which says the b3sum is for the `.txt` file. It's for the `.zip`.
-- [ ] Add a filename argument so the tool can be scripted. Keep reading the keyword from
+- [x] Add a filename argument so the tool can be scripted. Keep reading the keyword from
   stdin, because a password in `argv` ends up in shell history and `ps`.
 - [x] Document that matches are substrings: `Hunter02` also counts `xHunter02!`.
 - [ ] Consider a whole-line `--exact` mode to answer "is this exact password in the list?"

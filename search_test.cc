@@ -36,16 +36,31 @@ class SearchRunner {
     }
 
     Result run(const std::string& keyword, const fs::path& filename) const {
+        return execute(keyword + '\n' + filename.string() + '\n', "", "2>&1");
+    }
+
+    // Pass arguments on the command line and capture stdout on its own
+    Result run_with_arguments(const std::string& keyword,
+                              const std::string& arguments) const {
+        const fs::path errors = work_dir_ / "errors.txt";
+        return execute(keyword + '\n', arguments,
+                       "2> \"" + errors.string() + '"');
+    }
+
+    const fs::path& work_dir() const { return work_dir_; }
+
+   private:
+    Result execute(const std::string& answers_text,
+                   const std::string& arguments,
+                   const std::string& stderr_redirect) const {
         const fs::path answers = work_dir_ / "answers.txt";
         const fs::path output = work_dir_ / "output.txt";
 
-        std::ofstream(answers, std::ios::binary)
-            << keyword << '\n'
-            << filename.string() << '\n';
+        std::ofstream(answers, std::ios::binary) << answers_text;
 
-        const std::string command = '"' + binary_.string() + "\" < \"" +
-                                    answers.string() + "\" > \"" +
-                                    output.string() + "\" 2>&1";
+        const std::string command = '"' + binary_.string() + "\" " + arguments +
+                                    " < \"" + answers.string() + "\" > \"" +
+                                    output.string() + "\" " + stderr_redirect;
         const bool succeeded = std::system(command.c_str()) == 0;
 
         std::ifstream file(output, std::ios::binary);
@@ -53,9 +68,6 @@ class SearchRunner {
                                        std::istreambuf_iterator<char>())};
     }
 
-    const fs::path& work_dir() const { return work_dir_; }
-
-   private:
     fs::path binary_;
     fs::path work_dir_;
 };
@@ -147,6 +159,32 @@ const std::map<std::string, std::function<void(const SearchRunner&)>> TESTS = {
     {"directory",
      [](const SearchRunner& runner) {
          expect_error(runner, "needle", runner.work_dir(), "Error reading file");
+     }},
+    {"filename_argument",
+     [](const SearchRunner& runner) {
+         const fs::path path = runner.write_file("needle\nabc needle\nneedle\n");
+         const Result result =
+             runner.run_with_arguments("needle", '"' + path.string() + '"');
+         const std::string expected = "Occurrences of keyword \"needle\": 3\n";
+
+         if (!result.succeeded || result.output != expected) {
+             throw std::runtime_error("expected stdout \"" + expected +
+                                      "\", got: " +
+                                      result.output.substr(0, 200));
+         }
+     }},
+    {"too_many_arguments",
+     [](const SearchRunner& runner) {
+         const Result result = runner.run_with_arguments("needle", "one two");
+
+         std::ifstream errors(runner.work_dir() / "errors.txt");
+         const std::string message((std::istreambuf_iterator<char>(errors)),
+                                   std::istreambuf_iterator<char>());
+
+         if (result.succeeded || message.find("Usage:") == std::string::npos) {
+             throw std::runtime_error("expected a usage error, got: " +
+                                      message.substr(0, 200));
+         }
      }},
 };
 

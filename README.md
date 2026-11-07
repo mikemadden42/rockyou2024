@@ -34,6 +34,15 @@ Occurrences of keyword "Hunter02": 316
 Search complete. Time taken: 517.751 seconds
 ```
 
+You can also pass the filename as an argument. The result goes to stdout, while the prompts, progress, and timing go to stderr, so a script can capture just the result:
+
+```bash
+printf '%s\n' 'Hunter02' | ./search input.txt 2>/dev/null
+Occurrences of keyword "Hunter02": 316
+```
+
+The keyword is always read from stdin, so it doesn't end up in your shell history or `ps` output.
+
 The time above was measured before the read loop was rewritten. Your time will depend mostly on your disk.
 
 The search matches substrings, so `Hunter02` also counts `xHunter02!`. The result is the number of occurrences, not the number of matching lines, and matches are case-sensitive.

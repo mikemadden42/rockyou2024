@@ -97,7 +97,9 @@ foreach(test_name
         keyword_longer_than_chunk
         empty_keyword
         missing_file
-        directory)
+        directory
+        filename_argument
+        too_many_arguments)
     add_test(NAME ${test_name} COMMAND search_test $<TARGET_FILE:search> ${test_name})
     set_tests_properties(${test_name} PROPERTIES TIMEOUT 30)
 endforeach()
