@@ -74,12 +74,12 @@ different hardware, and the real file wasn't available to test.
   flags. (Found by reading the code, not by running it.)
 - [ ] Handle MSan on macOS, where the build fails with Apple clang. The other six build
   types pass.
-- [ ] Delete `add_custom_flags` (lines 74-94). Every sanitizer flag is applied twice, by
+- [x] Delete `add_custom_flags` (lines 74-94). Every sanitizer flag is applied twice, by
   this function and by `CMAKE_CXX_FLAGS_<TYPE>`.
-- [ ] Stop overwriting `CMAKE_CXX_FLAGS` on line 12, which discards the user's
+- [x] Stop overwriting `CMAKE_CXX_FLAGS` on line 12, which discards the user's
   `CXXFLAGS`. Use `add_compile_options` instead.
-- [ ] Set a default build type, since plain `cmake ..` builds without optimization.
-- [ ] Raise `cmake_minimum_required` to at least 3.13, which `target_link_options`
+- [x] Set a default build type, since plain `cmake ..` builds without optimization.
+- [x] Raise `cmake_minimum_required` to at least 3.13, which `target_link_options`
   requires.
 
 ## CI (`.github/workflows/cmake.yml`)
